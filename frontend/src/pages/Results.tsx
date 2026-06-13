@@ -8,7 +8,7 @@ import { normalizeRole } from "../utils/roles";
 import styles from "./Results.module.css";
 
 function ResultsPage() {
-  const { projectId = "alpha-payments" } = useParams();
+  const { projectId = "" } = useParams();
   const role = normalizeRole(useAuthStore((state) => state.user?.roles[0]));
   const [results, setResults] = useState<ResultResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);

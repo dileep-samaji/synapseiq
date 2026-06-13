@@ -3,6 +3,9 @@ export type ChecklistStatus = "Not Started" | "In Progress" | "Completed";
 export type AssignmentStatus = "Assigned" | "In Progress" | "Completed" | "Overdue";
 export type QuestionType = "single" | "multi" | "scenario";
 export type AssessmentType = "manual" | "ai-generated";
+export type RepositoryType = "Azure DevOps" | "GitHub" | "GitLab" | "Bitbucket";
+export type ProjectDocumentType = "PDF" | "DOCX" | "PPTX" | "TXT" | "MD" | "PNG" | "JPG";
+export type PersonalDocumentType = "PDF" | "DOCX" | "TXT";
 
 export interface ProjectSummary {
   id: string;
@@ -63,7 +66,7 @@ export interface KTAssignment {
 
 export interface KnowledgeDocument {
   id: string;
-  section: "Overview" | "Architecture" | "Modules" | "API Layer" | "Database Layer";
+  section: "Overview" | "Architecture" | "Modules" | "API Layer" | "Database Layer" | "Deployment";
   title: string;
   content: string;
 }
@@ -118,4 +121,54 @@ export interface ResultResponse {
   recommendedLearningPath: string[];
   assessmentHistory: Array<{ id: string; date: string; assessmentName: string; score: number }>;
   teamResults?: Array<{ learner: string; project: string; score: number; status: string }>;
+}
+
+export interface RepositoryConnectRequest {
+  projectName: string;
+  repositoryUrl: string;
+  repositoryType: RepositoryType;
+}
+
+export interface RepositoryAnalysisResult {
+  id: string;
+  projectId: string;
+  projectName: string;
+  repositoryUrl: string;
+  repositoryType: RepositoryType;
+  summary: string;
+  technologyStack: string[];
+  modules: Array<{ name: string; description: string }>;
+  contributors: Array<{ id: string; name: string; commits: number; expertiseAreas: string[] }>;
+  metrics: Array<{ label: string; value: string }>;
+  estimatedKtAreas: string[];
+}
+
+export interface ProjectLearner {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ProjectDocument {
+  id: string;
+  projectId: string;
+  fileName: string;
+  fileType: ProjectDocumentType;
+  uploadedBy: string;
+  uploadedDate: string;
+  isOfficial: boolean;
+  visibility: "project" | "personal";
+  ownerId?: string;
+}
+
+export interface AiAssistantMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  sources?: string[];
+}
+
+export interface AiAssistantResponse {
+  answer: string;
+  sources: string[];
 }

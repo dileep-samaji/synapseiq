@@ -1,5 +1,5 @@
 import { User, UserRole } from "../types";
-import { delay, mockUsers } from "./mockData";
+import { delay } from "../utils/delay";
 import { normalizeRole } from "../utils/roles";
 
 export interface LoginRequest {
@@ -33,25 +33,17 @@ export interface ResetPasswordRequest {
   confirm_password: string;
 }
 
-const REGISTERED_USERS_KEY = "synapseiq.mockUsers";
+export const REGISTERED_USERS_KEY = "synapseiq.users";
 
-interface MockRegisteredUser extends User {
+interface StoredUser extends User {
   password: string;
 }
 
-const seededCredentials: Record<string, string> = {
-  "admin@synapseiq.local": "Admin123",
-  "learner@synapseiq.local": "Learner123",
-};
-
-function readRegisteredUsers(): MockRegisteredUser[] {
+function readUsers(): StoredUser[] {
   try {
     const storedUsers = localStorage.getItem(REGISTERED_USERS_KEY);
-    if (!storedUsers) {
-      return [];
-    }
-
-    const users = JSON.parse(storedUsers) as Array<Omit<MockRegisteredUser, "roles"> & { roles?: unknown[] }>;
+    if (!storedUsers) return [];
+    const users = JSON.parse(storedUsers) as Array<Omit<StoredUser, "roles"> & { roles?: unknown[] }>;
     return users.map((user) => ({
       ...user,
       password: user.password ?? "",
@@ -62,31 +54,11 @@ function readRegisteredUsers(): MockRegisteredUser[] {
   }
 }
 
-function writeRegisteredUser(user: MockRegisteredUser) {
-  const users = readRegisteredUsers();
-  const nextUsers = [user, ...users.filter((item) => item.email.toLowerCase() !== user.email.toLowerCase())];
-  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(nextUsers));
+function writeUsers(users: StoredUser[]) {
+  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
 }
 
-function findMockUser(email: string): MockRegisteredUser | null {
-  const normalizedEmail = email.toLowerCase();
-  const registeredUser = readRegisteredUsers().find((user) => user.email.toLowerCase() === normalizedEmail);
-  if (registeredUser) {
-    return registeredUser;
-  }
-
-  const seededUser = mockUsers.find((user) => user.email.toLowerCase() === normalizedEmail);
-  if (seededUser) {
-    return {
-      ...seededUser,
-      password: seededCredentials[normalizedEmail],
-    };
-  }
-
-  return null;
-}
-
-function toSafeUser(user: MockRegisteredUser): User {
+function toSafeUser(user: StoredUser): User {
   return {
     email: user.email,
     id: user.id,
@@ -97,7 +69,7 @@ function toSafeUser(user: MockRegisteredUser): User {
 
 export const authService = {
   login: async (payload: LoginRequest) => {
-    const user = findMockUser(payload.email);
+    const user = readUsers().find((item) => item.email.toLowerCase() === payload.email.toLowerCase());
     if (!user) {
       throw new Error("No account found for this email. Please sign up first.");
     }
@@ -106,16 +78,18 @@ export const authService = {
     }
 
     const role = normalizeRole(user.roles[0]);
-    return delay({ token: `mock-token-${role.toLowerCase()}`, user: { ...toSafeUser(user), roles: [role] } });
+    return delay({ token: `local-token-${role.toLowerCase()}`, user: { ...toSafeUser(user), roles: [role] } });
   },
+
   signup: async (payload: SignupRequest) => {
-    const role = normalizeRole(payload.role);
-    const existingUser = findMockUser(payload.email);
+    const users = readUsers();
+    const existingUser = users.find((item) => item.email.toLowerCase() === payload.email.toLowerCase());
     if (existingUser) {
       throw new Error("An account already exists for this email. Please sign in.");
     }
 
-    const user: MockRegisteredUser = {
+    const role = normalizeRole(payload.role);
+    const user: StoredUser = {
       id: `${role.toLowerCase()}-${Date.now()}`,
       email: payload.email,
       name: payload.name,
@@ -123,20 +97,26 @@ export const authService = {
       roles: [role],
     };
 
-    writeRegisteredUser(user);
-
-    return delay({
-      token: `mock-token-${role.toLowerCase()}`,
-      user: toSafeUser(user),
-    });
+    writeUsers([user, ...users]);
+    return delay({ token: `local-token-${role.toLowerCase()}`, user: toSafeUser(user) });
   },
+
   forgotPassword: async (payload: ForgotPasswordRequest) => {
     return delay({ message: `Verification code generated for ${payload.email}.`, verification_code: "246810" });
   },
+
   resetPassword: async (payload: ResetPasswordRequest) => {
+    const users = readUsers();
+    const nextUsers = users.map((user) =>
+      user.email.toLowerCase() === payload.email.toLowerCase() ? { ...user, password: payload.password } : user,
+    );
+    writeUsers(nextUsers);
     return delay({ message: `Password reset for ${payload.email}.` });
   },
+
   me: async () => {
-    return delay<User>(mockUsers[0]);
+    const user = readUsers()[0];
+    if (!user) throw new Error("No signed-up users found.");
+    return delay<User>(toSafeUser(user));
   },
 };

@@ -24,7 +24,7 @@ function getNextSelection(question: AssessmentQuestion, currentSelection: string
 }
 
 function AssessmentPage() {
-  const { projectId = "alpha-payments" } = useParams();
+  const { projectId = "" } = useParams();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");

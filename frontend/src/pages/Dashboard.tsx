@@ -40,7 +40,7 @@ function DashboardPage() {
   useEffect(() => {
     let isMounted = true;
     dashboardService
-      .getDashboard(role)
+      .getDashboard(role, user?.email ?? "")
       .then((data) => {
         if (isMounted) setDashboard(data);
       })
@@ -54,7 +54,7 @@ function DashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, [role]);
+  }, [role, user?.email]);
 
   const filteredProjects = useMemo(() => {
     const projects = dashboard?.projects || [];

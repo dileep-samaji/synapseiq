@@ -7,7 +7,9 @@
 .panelHeader,
 .actions,
 .tabs,
-.tableActions {
+.tableActions,
+.filters,
+.inlineForm {
   display: flex;
   gap: 12px;
 }
@@ -20,7 +22,9 @@
 
 .actions,
 .tabs,
-.tableActions {
+.tableActions,
+.filters,
+.inlineForm {
   align-items: center;
 }
 
@@ -89,13 +93,20 @@
 .panelHeader input,
 .panelHeader select,
 .form input,
-.form select {
+.form select,
+.inlineForm select,
+.aiForm input {
   min-height: 40px;
   border: 1px solid #cfd8e6;
   border-radius: 8px;
   background: #ffffff;
   color: #17212b;
   padding: 0 12px;
+}
+
+.filters {
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .gridTwo {
@@ -208,6 +219,44 @@
   font-weight: 700;
 }
 
+.error {
+  margin: 16px 20px 0;
+  border: 1px solid #f2b8b5;
+  border-radius: 8px;
+  background: #fff1f0;
+  color: #b42318;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.assignedList {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.assignedLearner {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.assignedLearner button,
+.rowCard button {
+  border: 1px solid #cfd8e6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #176b87;
+  cursor: pointer;
+  padding: 8px 10px;
+  font-weight: 800;
+}
+
 .scorePair {
   min-width: 180px;
   display: grid;
@@ -248,6 +297,102 @@
   font-weight: 800;
 }
 
+.uploadButton {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #176b87;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.uploadButton input {
+  display: none;
+}
+
+.personalDocs {
+  border-top: 1px solid #edf1f6;
+  padding: 20px;
+}
+
+.personalDocs h3 {
+  margin: 0 0 10px;
+  color: #07142f;
+}
+
+.personalDocs p {
+  margin: 0;
+  color: #526178;
+}
+
+.chat {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+}
+
+.assistantMessage,
+.userMessage {
+  max-width: 820px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.assistantMessage {
+  background: #f7fbfc;
+}
+
+.userMessage {
+  justify-self: end;
+  background: #eef3ff;
+}
+
+.assistantMessage p,
+.userMessage p {
+  margin: 0;
+  color: #243341;
+  line-height: 1.55;
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sources strong,
+.sources span {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.sources strong {
+  color: #526178;
+}
+
+.sources span {
+  background: #ffffff;
+  color: #176b87;
+  font-weight: 800;
+}
+
+.aiForm {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+
 .doc button {
   width: 100%;
   display: flex;
@@ -278,9 +423,14 @@
 @media (max-width: 820px) {
   .hero,
   .panelHeader,
-  .rowCard {
+  .rowCard,
+  .aiForm {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .aiForm {
+    display: flex;
   }
 
   .gridTwo,
